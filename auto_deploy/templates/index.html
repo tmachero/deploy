@@ -1,0 +1,275 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>发布平台</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap-fileinput-master/css/fileinput.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.4.2/css/buttons.dataTables.min.css">
+
+    <style type="text/css">
+        #title{
+            margin-top: 40px;
+            font-size: 35px;
+        }
+        .envselect{
+
+            width:300px;
+        }
+        #envselectname{
+            font-size: 16px;
+        }
+        .row{
+            margin-top: 50px;
+        }
+        .modal select {
+            height:100px;
+            font-size: 20px;
+        }
+        #external_links_modal_content {
+            height:900px;
+        }
+        #upload,#confirm_upload,#upload_file_label {
+            margin-left:40px;
+        }
+        #upload_file_p {
+            display:inline;
+            margin-left:40px;
+        }
+        #confirm_upload {
+            display:block;
+        }
+        #conflist {
+            margin-top: 10px;
+            margin-right: 10px;
+            text-align: right;
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+     <a href="http://192.168.160.12:8888" id="conflist" class="text-right">配置列表</a>
+     <h1 class="text-center" id="title">发布系统</h1>
+     <div class="row">
+  <div class="col-md-10 col-md-offset-1">
+        <label class="envselect1" id="envselectname" >发布环境</label>
+        <select class="form-control envselect" disabled="disabled">
+            <option value="qa01">qa01</option>
+            <option value="qa02">qa02</option>
+            <option value="plus">plus</option>
+        </select>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+      <table id="myTable" class="display" style="width:100%" >
+        <thead>
+            <tr>
+                <th>APPNAME</th>
+                <th>TAG VERSION</th>
+                <th>STATUS</th>
+                <th>DEPLOYER</th>
+                <th>BUILD</th>
+                <th>DEPLOY</th>
+                <th>LOG</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
+
+<div class="modal fade" id="deploy_history_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">发布历史</h4>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table table-hover" id="history_list_table">
+                        <tr>
+                            <th>发布应用</th>
+                            <th>发布时间</th>
+                            <th>发布人</th>
+                            <th>发布状态</th>
+                            <th>TAG_VERSION</th>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+     <div class="modal fade bs-example-modal-lg" id="deploy_conf">
+        <div class="modal-dialog  modal-lg">
+            <div class="modal-content external_links_modal_content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">发布配置</h4>
+                </div>
+                <div class="modal-body external_links_modal_body" style="height:500px" >
+                    <form method="post" id="deploy_form">{% csrf_token %}
+                    <table class="table">
+                        <tr>
+                            <td>external_links_pool</td>
+                            <td></td>
+                            <td>selected_external_links</td>
+                        </tr>
+                        <tr>
+                            <div class="form-group">
+                            <td>
+                                <select  id="groups_left" name="groups_left"  multiple class="form-control" style="height:300px">
+                                </select>
+                            </td>
+                            </div>
+                            <td class="text-center">
+                                <br>
+                                <br>
+                                <br>
+                                <br>
+                                <br>
+                                <br>
+                                <input  type="button" id="add" name="add" value="   >>   " disabled>
+                                <br>
+                                <br>
+                                <input  type="button" id="remove" name="remove" value="   <<   " disabled>
+                                <br>
+                                <br>
+                                <p id="external_link_p"><input  type="checkbox" id="external_link_check">是否需要修改对外调用地址</p>
+                            </td>
+                            <div class="form-group">
+                            <td>
+                                <select  id="groups_right" name="groups_right"  multiple class="form-control" style="height:300px">
+                                </select>
+                            </td>
+                            </div>
+                        </tr>
+                    </table>
+                    </form>
+
+                    <form method="post" id="upload_file" enctype="multipart/form-data">{% csrf_token %}
+                        <label id="upload_file_label">配置文件</label>
+                        <input  type="file" name="upload" id="upload" />
+                        <button id="confirm_upload" type="button" disabled>upload</button>
+                        <!-- <p id="upload_file_p"><input  type="checkbox" id="upload_file_check">是否需要配置文件</p> -->
+
+                    </form>
+
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-danger" id="confirm_deploy">确认发布</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="log_output">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">构建日志</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12" style="height: 500px;overflow:auto" >
+                            <pre id="output-container" style="height: 490px"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="modal fade" id="deploy_log_console">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">发布日志</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12" style="height: 500px;overflow:auto" >
+                            <pre id="output-container-deploy" style="height: 490px"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="build_conf">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">构建</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <form class="form-horizontal" id="build_form">{% csrf_token %}
+                            <div class="form-group">
+                                <label for="branch_name" class="col-md-2 control-label">分支名称</label>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" id="branch_name" name="branch_name">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="tag_version" class="col-md-2 control-label">tag版本号</label>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control " id="tag_version" name="tag_version" disabled>
+                                    <label>
+                                    <input type="checkbox" id="check_tag_version">是否需要版本号
+                                </label>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirm_build">确认构建</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.4.2/js/buttons.html5.min.js"></script>
+
+
+    <script src="{% static "layer/layer.js" %}"></script>
+    <script src="{% static "autodeploy.js" %}"></script>
+
+
+
+
+</body>
+</html>
+
+
