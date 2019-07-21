@@ -110,15 +110,15 @@ def get_console_output(request):
     job_name=get_jenkins_job_name(env, appname)
     if env == "qa01" or env == "qa02":
         server = jenkins.Jenkins('http://jenkins.protest.xueba100.cc', username='haojie.liu',
-                                password='01af9c58e0dad91abbfbece390fc620e')
+                                password='passwd')
         jenkins_last_buildnumber = server.get_job_info(job_name)['lastBuild']['number']
         text_str = '%s/job/%s/%s/logText/progressiveText?start=%s'
-        auth = HTTPBasicAuth('haojie.liu', '01af9c58e0dad91abbfbece390fc620e')
+        auth = HTTPBasicAuth('haojie.liu', 'passwd')
         response = requests.get(text_str % ('http://jenkins.protest.xueba100.cc/',
                                             job_name, jenkins_last_buildnumber, start_offset), auth=auth)
     elif env == "plus":
         server = jenkins.Jenkins('http://jenkins.xueba100.cc/', username='haojie.liu',
-                                 password='3fb7937bc6a3fa417ef4cb3dfaa560ae')
+                                 password='passwd')
         jenkins_last_buildnumber = server.get_job_info(job_name)['lastBuild']['number']
         text_str = '%s/job/%s/%s/logText/progressiveText?start=%s'
         auth = HTTPBasicAuth('haojie.liu', '3fb7937bc6a3fa417ef4cb3dfaa560ae')
@@ -151,7 +151,7 @@ def startbuild(request):
     print(branch_name,tag_version,env,appname,username,job_name)
     if env == "qa01" or env == "qa02":
         server = jenkins.Jenkins('http://jenkins.protest.xueba100.cc', username='haojie.liu',
-                             password='01af9c58e0dad91abbfbece390fc620e')
+                             password='passwd')
         if env == "qa02":
             job_name="qa02-aixue-open-pro/" + job_name
         tag_version="null"
@@ -159,7 +159,7 @@ def startbuild(request):
         
     elif env == "plus":
         server = jenkins.Jenkins('http://jenkins.xueba100.cc', username='haojie.liu',
-                                 password='3fb7937bc6a3fa417ef4cb3dfaa560ae')
+                                 password='passwd')
         print(job_name,tag_version)
         server.build_job(job_name, parameters={'branch_name': branch_name,'version':tag_version})
         
